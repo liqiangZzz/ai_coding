@@ -1,0 +1,32 @@
+# 本机环境变量与密钥
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# IDE 与系统文件
+.idea/
+.vscode/
+.DS_Store
+
+# 运行数据
+data/
+logs/
+*.sqlite
+*.sqlite3
+
+# UI 构建文件
+ui/node_modules/
+ui/.tanstack/tmp/
+ui/tsconfig.tsbuildinfo
+ui/.output/
+
+# UI 构建产物
+ui/dist/
