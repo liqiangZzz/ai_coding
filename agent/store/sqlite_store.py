@@ -112,6 +112,7 @@ class LocalSqliteStore:
                   id TEXT PRIMARY KEY, --  事件 ID
                   thread_id TEXT NOT NULL, --  所属线程 ID
                   kind TEXT NOT NULL, --  事件种类
+                  key TEXT, --  事件键（细分标识，如 "read:file.py"）
                   title TEXT NOT NULL, --  事件标题
                   status TEXT NOT NULL, --  事件状态
                   detail TEXT, --  详细描述
@@ -201,6 +202,8 @@ class LocalSqliteStore:
             )
             # 增量迁移：保证旧表有 user_prompt 字段
             self._ensure_column("threads", "user_prompt", "TEXT")
+            # 增量迁移：保证旧表有 key 字段
+            self._ensure_column("run_events", "key", "TEXT")
             self._conn.commit()
 
     @staticmethod
@@ -352,6 +355,7 @@ class LocalSqliteStore:
         event_id: str,
         thread_id: str,
         kind: str,
+        key: str | None = None,
         title: str,
         status: str,
         detail: str | None = None,
@@ -366,16 +370,17 @@ class LocalSqliteStore:
             self._conn.execute(
                 """
                 INSERT INTO run_events (
-                    id, thread_id, kind, title, status, detail, created_at,updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    id, thread_id, kind, key, title, status, detail, created_at,updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                   kind=excluded.kind,
+                  key=excluded.key,
                   title=excluded.title,
                   status=excluded.status,
                   detail=excluded.detail,
                   updated_at=excluded.updated_at
                 """,
-                (event_id, thread_id, kind, title, status, detail, now, now),
+                (event_id, thread_id, kind, key, title, status, detail, now, now),
             )
             self._conn.commit()
 
